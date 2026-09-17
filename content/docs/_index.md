@@ -2,6 +2,11 @@
 ---
 title: Documentation
 versions:
+  - release: "2.0.0-dev.3"
+    location: "/documentation/2.0.0-dev.3"
+    release_date: 2026-09-17T16:04:49+0000
+    release_notes: "https://github.com/openeverest/everest-doc/releases/tag/v2.0.0-dev.3"
+    prerelease: true
   - release: "2.0.0-dev.2"
     location: "/documentation/2.0.0-dev.2"
     release_date: 2026-08-14T10:35:17+0000

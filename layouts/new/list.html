@@ -1,0 +1,146 @@
+{{ define "title" }}{{ .Title }} | {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+<div class="container mx-auto px-4 py-16 max-w-5xl">
+    <header class="mb-10">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+            <h1 class="text-4xl font-bold">{{ .Title }}</h1>
+            {{ $rss := .OutputFormats.Get "rss" }}
+            {{ if $rss }}
+            <a href="{{ $rss.RelPermalink }}"
+               class="inline-flex items-center gap-2 border-2 border-gray-300 hover:border-[#7790DE] text-gray-700 hover:text-[#7790DE] font-semibold px-4 py-2 rounded-lg transition-colors duration-300 whitespace-nowrap"
+               title="Subscribe via RSS">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2c6.075 0 11 4.925 11 11a1 1 0 102 0C16 8.82 10.18 3 3 3z"/><path d="M3 8a1 1 0 000 2 5 5 0 015 5 1 1 0 102 0 7 7 0 00-7-7z"/><circle cx="4.5" cy="15.5" r="1.5"/></svg>
+                RSS
+            </a>
+            {{ end }}
+        </div>
+        {{ if .Params.description }}
+        <p class="text-xl text-gray-600">{{ .Params.description }}</p>
+        {{ end }}
+    </header>
+
+    {{/* Collect the set of topics used across all items for the filter bar */}}
+    {{ $pages := where .Pages "Params.draft" "!=" true }}
+    {{ $pages = sort $pages "Date" "desc" }}
+    {{ $topics := slice }}
+    {{ range $pages }}
+        {{ range .Params.topics }}
+            {{ if . }}{{ $topics = $topics | append (. | string) }}{{ end }}
+        {{ end }}
+    {{ end }}
+    {{ $topics = uniq (sort $topics) }}
+
+    {{ if $topics }}
+    <div id="whatsnew-filter" class="flex flex-wrap gap-2 mb-10">
+        <button type="button" data-topic="all"
+            class="whatsnew-filter-btn bg-[#7790DE] text-white text-sm px-4 py-1.5 rounded-full transition-colors"
+            aria-pressed="true">All</button>
+        {{ range $topics }}
+        <button type="button" data-topic="{{ . | urlize }}"
+            class="whatsnew-filter-btn bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm px-4 py-1.5 rounded-full transition-colors"
+            aria-pressed="false">{{ . }}</button>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    <div id="whatsnew-list" class="space-y-10">
+        {{ $lastGroup := "" }}
+        {{ range $pages }}
+            {{ $group := .Date.Format "January 2006" }}
+            {{ if ne $group $lastGroup }}
+                {{ if ne $lastGroup "" }}</div></section>{{ end }}
+                <section class="whatsnew-group" data-group="{{ $group | urlize }}">
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 border-b border-gray-200 pb-2 mb-6">{{ $group }}</h2>
+                <div class="space-y-6">
+                {{ $lastGroup = $group }}
+            {{ end }}
+
+            {{ $itemTopics := slice }}
+            {{ range .Params.topics }}{{ if . }}{{ $itemTopics = $itemTopics | append (. | urlize) }}{{ end }}{{ end }}
+            <article class="whatsnew-item flex flex-col sm:flex-row gap-4 group" data-topics="{{ delimit $itemTopics " " }}">
+                <time datetime="{{ .Date.Format "2006-01-02" }}" class="flex-shrink-0 text-sm text-gray-500 sm:w-28 pt-1">{{ .Date.Format "Jan 2, 2006" }}</time>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-1">
+                        <a href="{{ .Permalink }}" class="text-gray-900 hover:text-[#7790DE] transition-colors">{{ .Title }}</a>
+                    </h3>
+                    {{ if .Params.summary }}
+                    <p class="text-gray-700 mb-2">{{ .Params.summary }}</p>
+                    {{ end }}
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                        {{ if .Params.link }}
+                        <a href="{{ .Params.link }}" class="inline-flex items-center gap-1 text-sm font-medium text-[#7790DE] hover:text-[#161641] transition-colors" target="_blank" rel="noopener noreferrer">
+                            Learn more
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                        {{ end }}
+                        {{ if .Params.topics }}
+                        <div class="flex flex-wrap gap-1.5">
+                            {{ range .Params.topics }}
+                            {{ if . }}
+                            <span class="bg-gray-100 text-gray-600 text-xs px-2.5 py-0.5 rounded-full">{{ . }}</span>
+                            {{ end }}
+                            {{ end }}
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </article>
+        {{ end }}
+        {{ if ne $lastGroup "" }}</div></section>{{ end }}
+    </div>
+
+    <p id="whatsnew-empty" class="hidden text-center text-gray-500 py-12">No updates match the selected topic.</p>
+</div>
+
+<script>
+(function () {
+    var buttons = document.querySelectorAll('.whatsnew-filter-btn');
+    if (!buttons.length) return;
+    var items = document.querySelectorAll('.whatsnew-item');
+    var groups = document.querySelectorAll('.whatsnew-group');
+    var empty = document.getElementById('whatsnew-empty');
+    var activeClasses = ['bg-[#7790DE]', 'text-white'];
+    var idleClasses = ['bg-gray-200', 'text-gray-700', 'hover:bg-gray-300'];
+
+    function setActive(btn) {
+        buttons.forEach(function (b) {
+            var on = b === btn;
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            activeClasses.forEach(function (c) { b.classList.toggle(c, on); });
+            idleClasses.forEach(function (c) { b.classList.toggle(c, !on); });
+        });
+    }
+
+    function apply(topic) {
+        var anyVisible = false;
+        items.forEach(function (item) {
+            var topics = (item.getAttribute('data-topics') || '').split(' ');
+            var show = topic === 'all' || topics.indexOf(topic) !== -1;
+            item.classList.toggle('hidden', !show);
+            if (show) anyVisible = true;
+        });
+        groups.forEach(function (group) {
+            var visible = group.querySelectorAll('.whatsnew-item:not(.hidden)').length;
+            group.classList.toggle('hidden', visible === 0);
+        });
+        if (empty) empty.classList.toggle('hidden', anyVisible);
+    }
+
+    buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var topic = btn.getAttribute('data-topic');
+            setActive(btn);
+            apply(topic);
+            history.replaceState(null, '', topic === 'all' ? location.pathname : '#' + topic);
+        });
+    });
+
+    var initial = (location.hash || '').replace('#', '');
+    if (initial) {
+        var match = Array.prototype.find.call(buttons, function (b) { return b.getAttribute('data-topic') === initial; });
+        if (match) { setActive(match); apply(initial); }
+    }
+})();
+</script>
+{{ end }}

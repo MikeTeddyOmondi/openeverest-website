@@ -14,4 +14,4 @@ The OpenEverest MariaDB provider now supports point-in-time recovery (PITR), let
 
 Previously, restores were limited to full backup snapshots. With PITR, you can recover from accidental data loss, schema changes, or user errors without losing everything written after the last snapshot. The provider manages the backup chain and transaction log retention automatically.
 
-Point-in-time recovery is available now for all MariaDB instances managed through OpenEverest. Upgrade the MariaDB provider to version 0.1.5 via Helm to use the new feature.
+Point-in-time recovery is available now for all MariaDB instances deployed with async-replication topology managed through OpenEverest. Upgrade the MariaDB provider to version 0.1.5 via Helm to use the new feature.

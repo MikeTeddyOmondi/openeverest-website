@@ -26,6 +26,9 @@
                         <a href="/extensions/" class="flex items-center justify-between px-4 py-3 text-[#7790DE] hover:text-[#161641] hover:bg-gray-50 rounded-t-lg transition-colors">
                             <span>Extension Hub</span>
                         </a>
+                        <a href="/new" class="flex items-center justify-between px-4 py-3 text-[#7790DE] hover:text-[#161641] hover:bg-gray-50 transition-colors {{ if eq .Section "new" }}text-[#161641]{{ end }}">
+                            <span>What's New</span>
+                        </a>
                         <a href="https://github.com/openeverest/roadmap" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-4 py-3 text-[#7790DE] hover:text-[#161641] hover:bg-gray-50 transition-colors">
                             <span>Roadmap</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,6 +160,9 @@
                     <div id="mobile-product-menu" class="hidden pl-4 mt-2 space-y-2">
                         <a href="/extensions/" class="block px-4 py-2 text-[#7790DE] hover:text-[#161641] transition-colors">
                             Extension Hub
+                        </a>
+                        <a href="/new" class="block px-4 py-2 text-[#7790DE] hover:text-[#161641] transition-colors">
+                            What's New
                         </a>
                         <a href="https://github.com/openeverest/roadmap" target="_blank" rel="noopener noreferrer" class="block px-4 py-2 text-[#7790DE] hover:text-[#161641] transition-colors">
                             Roadmap

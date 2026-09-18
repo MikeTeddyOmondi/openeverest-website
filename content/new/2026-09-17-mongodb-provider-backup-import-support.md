@@ -1,5 +1,5 @@
 ---
-title: "MongoDB provider now supports backup imports via updated Backup CRD"
+title: "MongoDB provider now supports backup imports from external sources"
 date: 2026-09-17T17:39:28Z
 draft: false
 topics:

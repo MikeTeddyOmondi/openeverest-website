@@ -1,5 +1,5 @@
 ---
-title: "OpenEverest scheduling now supports tolerations, node selectors, and topology spread constraints"
+title: "OpenEverest now supports tolerations, node selectors, and topology spread constraints for scheduling"
 date: 2026-09-17T10:00:00Z
 draft: false
 topics:

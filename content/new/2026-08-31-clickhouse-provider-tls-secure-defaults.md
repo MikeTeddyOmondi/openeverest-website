@@ -1,5 +1,5 @@
 ---
-title: "ClickHouse provider now ships with TLS and secure user defaults"
+title: "ClickHouse provider delivers TLS and secure user defaults out of the box"
 date: 2026-08-31T18:12:35Z
 draft: false
 topics:

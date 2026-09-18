@@ -1,5 +1,5 @@
 ---
-title: "OpenEverest provider upgrades now require explicit approval for disruptive changes"
+title: "OpenEverest adds maintenance approval gates for provider upgrades"
 date: 2026-09-17T10:00:00Z
 draft: false
 topics:

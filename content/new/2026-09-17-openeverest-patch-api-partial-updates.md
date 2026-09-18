@@ -1,5 +1,5 @@
 ---
-title: "OpenEverest now supports partial updates with PATCH on Instance and BackupStorage APIs"
+title: "OpenEverest now supports PATCH-based partial updates on Instance and BackupStorage APIs"
 date: 2026-09-17T10:00:00Z
 draft: false
 topics:

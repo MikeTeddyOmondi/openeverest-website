@@ -1,5 +1,5 @@
 ---
-title: "ClickHouse provider now exposes clusters through the OpenEverest API"
+title: "ClickHouse provider now exposes cluster topology through the OpenEverest API"
 date: 2026-08-31T18:12:35Z
 draft: false
 topics:

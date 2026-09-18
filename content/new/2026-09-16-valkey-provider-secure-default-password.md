@@ -1,5 +1,5 @@
 ---
-title: "Valkey provider now generates secure passwords for the default user automatically"
+title: "Automatic secure password generation is now available in the Valkey provider"
 date: 2026-09-16T13:12:41Z
 draft: false
 topics:
@@ -7,7 +7,7 @@ topics:
  - security
  - releases
 link: https://github.com/openeverest/provider-valkey/releases/tag/v0.1.6
-summary: The OpenEverest Valkey provider now automatically generates a secure password for the default user at instance creation time.
+summary: Automatic secure password generation is now available when creating Valkey instances through OpenEverest.
 ---
 
 The OpenEverest Valkey provider now automatically generates a strong, random password for the default user at instance creation time, so new instances start with secure credentials instead of hard-coded or blank defaults.

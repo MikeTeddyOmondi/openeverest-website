@@ -1,5 +1,5 @@
 ---
-title: "ClickHouse provider now lets you fine-tune engine parameters through the UI"
+title: "ClickHouse provider adds UI-based engine parameter tuning"
 date: 2026-08-31T18:12:35Z
 draft: false
 topics:

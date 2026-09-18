@@ -1,0 +1,62 @@
+{{ define "title" }}{{ .Title }} - {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+<article class="container mx-auto px-4 pb-16 pt-10 max-w-3xl">
+
+    {{/* Breadcrumb navigation */}}
+    <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-sm mb-6">
+        <a href="/" class="text-[#7790DE] hover:text-[#161641] transition-colors">Home</a>
+        <span class="text-gray-400">/</span>
+        <a href="/new/" class="text-[#7790DE] hover:text-[#161641] transition-colors">What's New</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-600" aria-current="page">{{ .Title }}</span>
+    </nav>
+
+    {{ if and .Params.image .Params.image.url }}
+    <div class="rounded-xl overflow-hidden shadow-lg mb-8">
+        <img src="{{ .RelPermalink }}{{ .Params.image.url }}" alt="{{ .Title }}" class="w-full h-auto">
+    </div>
+    {{ end }}
+
+    <header class="mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">{{ .Title }}</h1>
+        <div class="text-gray-600 text-sm flex flex-wrap items-center gap-2">
+            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+            {{ if .Params.topics }}
+            <span class="mx-1">•</span>
+            <div class="flex flex-wrap gap-1.5">
+                {{ range .Params.topics }}
+                {{ if . }}
+                <a href="/new/#{{ . | urlize }}" class="bg-gray-100 text-gray-600 text-xs px-2.5 py-0.5 rounded-full hover:bg-gray-200 transition-colors">{{ . }}</a>
+                {{ end }}
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+        {{ if .Params.image.attribution }}
+        <p class="text-xs mt-2 text-gray-500">Image: <a href="{{ .Params.image.attribution }}" class="hover:underline" target="_blank" rel="noopener noreferrer">{{ .Params.image.attribution }}</a></p>
+        {{ end }}
+    </header>
+
+    <div class="prose prose-lg max-w-none">
+        {{ .Content }}
+    </div>
+
+    {{ if .Params.link }}
+    <div class="mt-8">
+        <a href="{{ .Params.link }}" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-2 bg-[#7790DE] hover:bg-[#161641] text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-300">
+            Read the docs
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+    </div>
+    {{ end }}
+
+    <div class="mt-12 pt-6 border-t border-gray-200">
+        <a href="/new/" class="inline-flex items-center gap-1 text-sm font-medium text-[#7790DE] hover:text-[#161641] transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to What's New
+        </a>
+    </div>
+</article>
+{{ end }}

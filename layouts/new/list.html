@@ -31,15 +31,45 @@
     {{ end }}
     {{ $topics = uniq (sort $topics) }}
 
+    {{/* Order topics by how often they appear so the quick pills show the most-used ones. */}}
+    {{ $counts := newScratch }}
+    {{ range $pages }}{{ range .Params.topics }}{{ if . }}{{ $counts.Add (. | string) 1 }}{{ end }}{{ end }}{{ end }}
+    {{ $cmap := $counts.Values }}
+    {{ $pairs := slice }}
+    {{ range $topics }}{{ $pairs = $pairs | append (dict "topic" . "count" (index $cmap .)) }}{{ end }}
+    {{ $pairs = sort $pairs "count" "desc" }}
+    {{ $maxPills := 6 }}
+    {{ $topPairs := first $maxPills $pairs }}
+    {{ $showSearch := gt (len $topics) $maxPills }}
+
     {{ if $topics }}
-    <div id="whatsnew-filter" class="flex flex-wrap gap-2 mb-10">
+    <div id="whatsnew-filter" class="flex flex-wrap items-center gap-2 mb-10">
         <button type="button" data-topic="all"
             class="whatsnew-filter-btn bg-[#7790DE] text-white text-sm px-4 py-1.5 rounded-full transition-colors"
             aria-pressed="true">All</button>
-        {{ range $topics }}
-        <button type="button" data-topic="{{ . | urlize }}"
+        {{ range $topPairs }}
+        <button type="button" data-topic="{{ .topic | urlize }}"
             class="whatsnew-filter-btn bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm px-4 py-1.5 rounded-full transition-colors"
-            aria-pressed="false">{{ . }}</button>
+            aria-pressed="false">{{ .topic }}</button>
+        {{ end }}
+        {{ if $showSearch }}
+        <div class="relative">
+            <input id="whatsnew-search" type="text" autocomplete="off" placeholder="Filter labels…"
+                class="text-sm text-gray-700 placeholder-gray-400 bg-white border border-gray-300 rounded-full pl-8 pr-3 py-1.5 w-44 focus:w-56 focus:outline-none focus:border-[#7790DE] transition-all"
+                aria-label="Filter by label">
+            <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+            <ul id="whatsnew-suggest" class="hidden absolute z-20 mt-1 max-h-60 w-56 overflow-auto bg-white border border-gray-200 rounded-lg shadow-lg py-1" role="listbox">
+                {{ range $pairs }}
+                <li>
+                    <button type="button" data-topic="{{ .topic | urlize }}"
+                        class="whatsnew-suggest-item w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
+                        <span>{{ .topic }}</span>
+                        <span class="text-xs text-gray-400">{{ .count }}</span>
+                    </button>
+                </li>
+                {{ end }}
+            </ul>
+        </div>
         {{ end }}
     </div>
     {{ end }}
@@ -89,17 +119,20 @@
 
 <script>
 (function () {
-    var buttons = document.querySelectorAll('.whatsnew-filter-btn');
-    if (!buttons.length) return;
+    var pills = document.querySelectorAll('.whatsnew-filter-btn');
+    if (!pills.length) return;
     var items = document.querySelectorAll('.whatsnew-item');
     var groups = document.querySelectorAll('.whatsnew-group');
     var empty = document.getElementById('whatsnew-empty');
+    var search = document.getElementById('whatsnew-search');
+    var suggest = document.getElementById('whatsnew-suggest');
+    var suggestItems = suggest ? suggest.querySelectorAll('.whatsnew-suggest-item') : [];
     var activeClasses = ['bg-[#7790DE]', 'text-white'];
     var idleClasses = ['bg-gray-200', 'text-gray-700', 'hover:bg-gray-300'];
 
-    function setActive(btn) {
-        buttons.forEach(function (b) {
-            var on = b === btn;
+    function setActivePill(topic) {
+        pills.forEach(function (b) {
+            var on = b.getAttribute('data-topic') === topic;
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
             activeClasses.forEach(function (c) { b.classList.toggle(c, on); });
             idleClasses.forEach(function (c) { b.classList.toggle(c, !on); });
@@ -121,20 +154,53 @@
         if (empty) empty.classList.toggle('hidden', anyVisible);
     }
 
-    buttons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var topic = btn.getAttribute('data-topic');
-            setActive(btn);
-            apply(topic);
-            history.replaceState(null, '', topic === 'all' ? location.pathname : '#' + topic);
-        });
+    function isPill(topic) {
+        return Array.prototype.some.call(pills, function (b) { return b.getAttribute('data-topic') === topic; });
+    }
+
+    function labelFor(topic) {
+        var m = Array.prototype.find.call(suggestItems, function (li) { return li.getAttribute('data-topic') === topic; });
+        return m ? m.querySelector('span').textContent.trim() : topic;
+    }
+
+    function selectTopic(topic) {
+        apply(topic);
+        setActivePill(topic);
+        if (search) {
+            // Show the active label in the search box only when it isn't one of the quick pills.
+            search.value = (topic === 'all' || isPill(topic)) ? '' : labelFor(topic);
+        }
+        if (suggest) suggest.classList.add('hidden');
+        history.replaceState(null, '', topic === 'all' ? location.pathname : '#' + topic);
+    }
+
+    pills.forEach(function (btn) {
+        btn.addEventListener('click', function () { selectTopic(btn.getAttribute('data-topic')); });
     });
 
-    var initial = (location.hash || '').replace('#', '');
-    if (initial) {
-        var match = Array.prototype.find.call(buttons, function (b) { return b.getAttribute('data-topic') === initial; });
-        if (match) { setActive(match); apply(initial); }
+    if (search && suggest) {
+        function filterSuggest() {
+            var q = (search.value || '').toLowerCase().trim();
+            suggestItems.forEach(function (li) {
+                var t = li.getAttribute('data-topic');
+                var show = !q || t.indexOf(q) !== -1 || li.textContent.toLowerCase().indexOf(q) !== -1;
+                li.parentElement.classList.toggle('hidden', !show);
+            });
+            suggest.classList.remove('hidden');
+        }
+        search.addEventListener('focus', filterSuggest);
+        search.addEventListener('input', filterSuggest);
+        suggestItems.forEach(function (li) {
+            li.addEventListener('click', function () { selectTopic(li.getAttribute('data-topic')); });
+        });
+        document.addEventListener('click', function (e) {
+            if (!suggest.contains(e.target) && e.target !== search) suggest.classList.add('hidden');
+        });
+        search.addEventListener('keydown', function (e) { if (e.key === 'Escape') suggest.classList.add('hidden'); });
     }
+
+    var initial = (location.hash || '').replace('#', '');
+    if (initial) selectTopic(initial);
 })();
 </script>
 {{ end }}

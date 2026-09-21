@@ -1,5 +1,5 @@
 ---
-title: "MongoDB Explorer plugin now auto-discovers your instances in the sidebar"
+title: "MongoDB Explorer plugin adds sidebar auto-discovery for your instances"
 date: 2026-09-18T07:38:11Z
 draft: false
 topics:

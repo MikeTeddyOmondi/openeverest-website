@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+  merge_group:
   workflow_dispatch:
 
 permissions:
@@ -27,9 +28,14 @@ jobs:
           fetch-depth: 0
       - name: Check image sizes
         run: |
+          base=""
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base="${{ github.event.pull_request.base.sha }}"
-            echo "Checking images added or modified in this PR (limit ${MAX_IMAGE_KB} KB)..."
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            base="${{ github.event.merge_group.base_sha }}"
+          fi
+          if [ -n "$base" ]; then
+            echo "Checking images added or modified since ${base} (limit ${MAX_IMAGE_KB} KB)..."
             files=()
             while IFS= read -r f; do
               files+=("$f")

@@ -1,5 +1,5 @@
 ---
-title: "Plugin Hub now detects and alerts outdated plugin and provider versions"
+title: "Plugin Hub adds version detection and update alerts"
 date: 2026-09-17T11:21:31Z
 draft: false
 topics:

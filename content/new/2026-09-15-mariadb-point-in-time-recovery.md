@@ -4,7 +4,7 @@ date: 2026-09-15T07:07:45Z
 draft: false
 topics:
  - mariadb
-n - backups
+ - backups
  - releases
 link: https://github.com/openeverest/provider-mariadb/releases/tag/v0.1.5
 summary: The OpenEverest MariaDB provider now supports point-in-time recovery, letting you restore a database to any moment within the backup retention window.

@@ -1,5 +1,5 @@
 ---
-title: "OpenEverest now creates instances in one click from a preset"
+title: "OpenEverest introduces one-click instance creation from presets"
 date: 2026-09-17T10:00:00Z
 draft: false
 topics:

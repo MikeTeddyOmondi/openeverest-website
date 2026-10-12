@@ -31,6 +31,61 @@ So I built a cluster that was already maxed out, and started changing it.
 * Valkey 9.0.6, cluster topology, 3 shards with 1 replica each, TLS on
 * kube-prometheus-stack and the OpenEverest metrics plugin for dashboards
 
+This is where everything ran once the cluster had 6 shards. Each shard is a primary and a replica, and the operator never puts two pods of the same shard on one node. The dashed shards are the ones the scale-out added.
+
+<div class="vks-topo">
+  <div class="vks-pool">
+    <div class="vks-pool-title">Valkey nodes <span>4 × 16 vCPU, 32 GB</span></div>
+    <div class="vks-nodes">
+      <div class="vks-node">
+        <b>node 1</b>
+        <span class="vks-pod vks-c0">shard 0</span>
+        <span class="vks-pod vks-c1">shard 1</span>
+        <span class="vks-pod vks-c4 vks-new">shard 4</span>
+        <span class="vks-pod vks-tool">memtier</span>
+      </div>
+      <div class="vks-node">
+        <b>node 2</b>
+        <span class="vks-pod vks-c1">shard 1</span>
+        <span class="vks-pod vks-c2">shard 2</span>
+        <span class="vks-pod vks-c3 vks-new">shard 3</span>
+        <span class="vks-pod vks-tool">memtier</span>
+      </div>
+      <div class="vks-node">
+        <b>node 3</b>
+        <span class="vks-pod vks-c0">shard 0</span>
+        <span class="vks-pod vks-c3 vks-new">shard 3</span>
+        <span class="vks-pod vks-c5 vks-new">shard 5</span>
+        <span class="vks-pod vks-tool">memtier</span>
+      </div>
+      <div class="vks-node">
+        <b>node 4</b>
+        <span class="vks-pod vks-c2">shard 2</span>
+        <span class="vks-pod vks-c4 vks-new">shard 4</span>
+        <span class="vks-pod vks-c5 vks-new">shard 5</span>
+        <span class="vks-pod vks-tool">memtier</span>
+      </div>
+    </div>
+  </div>
+  <div class="vks-pool vks-pool-tools">
+    <div class="vks-pool-title">Tools node <span>8 vCPU, 16 GB</span></div>
+    <div class="vks-nodes">
+      <div class="vks-node">
+        <span class="vks-pod vks-tool">write probe</span>
+        <span class="vks-pod vks-tool">Prometheus</span>
+        <span class="vks-pod vks-tool">Grafana</span>
+      </div>
+    </div>
+  </div>
+  <div class="vks-topo-notes">
+    <span><i class="vks-pod vks-c0"></i>Valkey pod: 2 CPU, 4 GiB, 10 GiB volume</span>
+    <span><i class="vks-pod vks-c3 vks-new"></i>added by the 3 → 6 scale-out</span>
+    <span><i class="vks-pod vks-tool"></i>test client or monitoring (memtier: 3 CPU each)</span>
+  </div>
+</div>
+
+Every client talks to every shard, so each memtier pod sends traffic to all four nodes, not just its own. Which pod of a shard is the primary changed during the tests, because every failover swaps the roles.
+
 This is the `Instance`. It is what you get from the UI, plus a node selector and two config lines:
 
 ```yaml
@@ -488,6 +543,22 @@ If you run these tests yourself and see something different, please open an issu
 .vks-table tr:last-child td{border-bottom:0;}
 .vks-table th{background:rgba(127,127,127,0.06);font-weight:600;}
 .vks-table td:first-child{color:#4b5563;}
+.vks-topo{margin:1.5rem 0;border:1px solid rgba(127,127,127,0.25);border-radius:12px;padding:16px 18px;}
+.vks-pool{border:1px dashed rgba(127,127,127,0.45);border-radius:10px;padding:10px 12px 12px;}
+.vks-pool+.vks-pool{margin-top:12px;}
+.vks-pool-title{font-size:13px;font-weight:700;color:#374151;margin-bottom:8px;}
+.vks-pool-title span{font-weight:400;color:#6b7280;margin-left:6px;}
+.vks-nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.vks-pool-tools .vks-nodes{grid-template-columns:1fr;}
+.vks-pool-tools .vks-node{flex-direction:row;flex-wrap:wrap;}
+.vks-node{display:flex;flex-direction:column;gap:6px;border:1px solid rgba(127,127,127,0.3);border-radius:8px;padding:8px;background:rgba(127,127,127,0.04);}
+.vks-node b{font-size:13px;color:#111827;}
+.vks-pod{display:block;border:2px solid;border-radius:6px;padding:4px 8px;font-size:13px;font-weight:600;text-align:center;}
+.vks-pod.vks-new{border-style:dashed;}
+.vks-pod.vks-tool{border-color:#9ca3af;background:#f3f4f6;color:#374151;font-weight:500;}
+.vks-topo-notes{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:12px;color:#4b5563;}
+.vks-topo-notes i.vks-pod{display:inline-block;width:14px;height:12px;padding:0;margin-right:6px;vertical-align:-2px;}
+@media (max-width:640px){.vks-nodes{grid-template-columns:repeat(2,1fr);}}
 .vks-card{margin:.75rem 0;border:1px solid rgba(127,127,127,0.25);border-radius:10px;padding:0 16px;}
 .vks-card>summary{padding:12px 0;cursor:pointer;font-weight:600;}
 .vks-card[open]>summary{border-bottom:1px solid rgba(127,127,127,0.2);margin-bottom:8px;}

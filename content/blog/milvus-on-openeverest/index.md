@@ -1,9 +1,9 @@
 ---
-title: "Milvus on OpenEverest: a Vector Database Your Platform Can Offer"
-date: 2026-10-14T00:00:00
+title: "Milvus on OpenEverest - A Vector On Your Platform"
+date: 2026-10-13T00:00:00
 draft: true
 image:
-    url: blog-milvus-intro.png
+    url: milvus-blog-cover.png
 authors:
   - spron-in
 tags:
@@ -11,8 +11,8 @@ tags:
   - milvus
   - vector-database
   - kubernetes
-  - provider
   - v2
+  - provider
   - backups
 summary: "Milvus is now available on OpenEverest. I deployed it as a platform service, indexed the whole Kubernetes documentation for semantic search, upgraded it under live traffic, and cloned it into staging from a backup. Here is what that looked like."
 ---
@@ -135,24 +135,9 @@ helm install provider-milvus \
 kubectl get providers milvus
 ```
 
-<div class="mvs-shot">
-  <b>Screenshot placeholder:</b> OpenEverest UI, the database engine picker with Milvus next to the other engines.
-  <code>milvus-ui-engines.png</code>
-</div>
-
 ## Create a Milvus cluster
 
 In the UI, Milvus shows up as one more engine. The form is generated from the provider's own schema, so it only offers what the provider supports: topology and version first, then a section per Milvus role (replicas, CPU, RAM), then object storage, the metadata store and the message stream. Exposure, monitoring and pod scheduling sit under advanced configuration.
-
-<div class="mvs-shot">
-  <b>Screenshot placeholder:</b> create wizard, "Basic Information" step with the cluster topology and version 2.6.11 selected.
-  <code>milvus-ui-create-basic.png</code>
-</div>
-
-<div class="mvs-shot">
-  <b>Screenshot placeholder:</b> create wizard, component sizing (proxy, query nodes, data nodes, streaming nodes, coordinator).
-  <code>milvus-ui-create-components.png</code>
-</div>
 
 The UI creates an `Instance`. This is the one I used, with two proxies and two query nodes so a single pod restart doesn't take searches down:
 
@@ -205,7 +190,7 @@ It was `Ready` **2 minutes 42 seconds** after `kubectl apply`, with 11 pods spre
 
 <div class="mvs-table">
 
-| | |
+| Resource | What `docs-search` got |
 |---|---|
 | Milvus pods | 7: 2 proxies, 2 query nodes, 1 each of mixCoord, dataNode, streamingNode |
 | Dependencies | 3 etcd pods, 1 MinIO pod, 4 volumes of 10 GiB |
@@ -217,10 +202,7 @@ It was `Ready` **2 minutes 42 seconds** after `kubectl apply`, with 11 pods spre
 
 Authentication is on from the start, with a random root password. Applications read everything from the connection Secret: `host`, `port`, `username`, `password`, a ready-made `uri`, and a `token` in the `root:<password>` form pymilvus expects. The password never appears in the Milvus custom resource or in the config Milvus renders. To change it, you edit the credentials Secret and the provider rotates it in Milvus.
 
-<div class="mvs-shot">
-  <b>Screenshot placeholder:</b> instance overview page for <code>docs-search</code>: Ready, cluster topology, version, connection details.
-  <code>milvus-ui-overview.png</code>
-</div>
+<img class="mvs-img" src="milvus-overview.png" alt="OpenEverest overview page of the docs-search Milvus instance: Ready, cluster topology, Milvus 2.6.15, connection details, a card per Milvus role with replicas, CPU and RAM, and the latest backups and schedules">
 
 ## Put something real in it: semantic search over the Kubernetes docs
 
@@ -371,6 +353,10 @@ The provider sees that every component uses the same image and switches the oper
 
 One thing I can't explain yet: about a minute after the proxies finished, p99 went from ~10 ms to ~15 ms and stayed there, while p50 stayed at 4 ms and throughput went *up* a bit. It could be a change in 2.6.15 or how segments landed on the new query nodes. I didn't dig into it for this post. The two dips around 16 and 18 minutes are mine: two short Jobs loading the embedding model on a shared node.
 
+To see what happened inside, you don't need `kubectl`. The [Inspector plugin](https://github.com/openeverest/plugin-inspector) shows every pod behind the instance, which node it runs on and how often it restarted, and streams its logs. Here, after the upgrade: the Milvus pods spread across the nodes with 0 restarts, and the coordinator's log assigning the WAL channels to the streaming node.
+
+<img class="mvs-img" src="milvus-inspector-view.png" alt="OpenEverest Inspector plugin for docs-search: a diagram of the dataNode, mixCoord, two proxy and two queryNode pods, all running with 0 restarts, with their nodes, and the mixCoord container log below">
+
 ### Trying to go back
 
 Downgrades are where vector databases bite you: the newer version may already have written metadata the older one doesn't understand. So the provider refuses them:
@@ -446,10 +432,9 @@ spec:
 
 The first `every-15m` run started at 12:15:00 and was done at 12:15:05. Retention deletes the old runs, and their data in the bucket with them.
 
-<div class="mvs-shot">
-  <b>Screenshot placeholder:</b> backups tab of <code>docs-search</code>: the on-demand backup and the scheduled runs, with their state and storage.
-  <code>milvus-ui-backups.png</code>
-</div>
+<img class="mvs-img" src="milvus-backups.png" alt="Backups tab of docs-search: the on-demand backup docs-search-before-reembed and three every-15m runs, all Succeeded, on the s3-backups storage with the milvus-backup class, and 2 active schedules">
+
+The UI shows times in my local timezone (UTC+3), so 12:05 UTC is 15:05 here. The Size column is still empty; the provider doesn't report backup sizes yet.
 
 ### Cloning production into staging
 
@@ -498,11 +483,6 @@ spec:
 **2 minutes 43 seconds** from nothing to a searchable copy. The restore itself took 31 seconds; the rest was Milvus starting. While seeding, the instance reports `Restoring` and doesn't publish its connection details, so nothing connects to a half-restored database.
 
 Is it really the same? I ran the six questions against both instances and compared the top 5 results by primary key. They matched exactly, and so did the row count.
-
-<div class="mvs-shot">
-  <b>Screenshot placeholder:</b> create wizard with "restore from backup" chosen, or the staging instance overview while it is <code>Restoring</code>.
-  <code>milvus-ui-staging-restore.png</code>
-</div>
 
 ## What's not there yet
 
@@ -605,9 +585,12 @@ If you try this and see something different, please open an issue in [provider-m
 .mvs-roles span.mvs-done{border-color:#0aa66e;background:#e8f7f0;color:#065f46;}
 .mvs-client{font-size:14px;padding:8px 12px;border-radius:8px;background:#eef2ff;color:#312e81;}
 .mvs-img{display:block;width:100%;height:auto;margin:1.5rem 0;border:1px solid rgba(127,127,127,0.25);border-radius:12px;padding:8px;background:#fff;}
-.mvs-table table{width:100%;}
-.mvs-shot{margin:1.5rem 0;padding:28px 20px;border:2px dashed #9ca3af;border-radius:12px;background:rgba(127,127,127,0.06);text-align:center;font-size:14px;color:#4b5563;}
-.mvs-shot code{display:block;margin-top:6px;font-size:12px;}
+.mvs-table{margin:1.5rem 0;overflow-x:auto;border:1px solid rgba(127,127,127,0.25);border-radius:12px;}
+.mvs-table table{width:100%;border-collapse:collapse;font-size:14px;margin:0;}
+.mvs-table th,.mvs-table td{padding:10px 16px;text-align:left;vertical-align:top;line-height:1.5;border-bottom:1px solid rgba(127,127,127,0.18);}
+.mvs-table tr:last-child td{border-bottom:0;}
+.mvs-table th{background:rgba(127,127,127,0.06);font-weight:600;}
+.mvs-table td:first-child{white-space:nowrap;font-weight:600;color:#374151;}
 .mvs-qa details{margin:10px 0;border:1px solid rgba(127,127,127,0.25);border-radius:10px;padding:10px 14px;}
 .mvs-qa summary{cursor:pointer;font-weight:600;}
 .mvs-hits{list-style:none;padding:0;margin:10px 0;}

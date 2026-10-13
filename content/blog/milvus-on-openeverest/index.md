@@ -1,7 +1,7 @@
 ---
 title: "Milvus on OpenEverest - A Vector On Your Platform"
 date: 2026-10-13T00:00:00
-draft: true
+draft: false
 image:
     url: milvus-blog-cover.png
 authors:

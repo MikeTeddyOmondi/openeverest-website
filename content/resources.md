@@ -29,6 +29,58 @@ events:
     image: "/images/resources/kubecon-us-2026-cover.png"
     description: "Visit our kiosk in the Solutions Showcase on Wednesday, November 11 · 1:55–5:00 PM. Kiosk details and who you'll meet."
 
+  - title: "Kubernetes, LLM and Platform Engineer walk into a bar"
+    url: "https://www.conf42.com/Platform_Engineering_2026_Sergey_Pronin_kubernetes_llm_engineer"
+    event_name: "Conf42 Platform Engineering 2026"
+    location: "Virtual Conference"
+    date: 2026-11-05
+    speaker: "Sergey Pronin"
+    speaker_slug: "spron-in"
+    type: "conference"
+    image: "/images/resources/conf42cover.png"
+    description: "Thursday, November 5 · talks go live at 5:00 PM GMT. What it actually takes to build Model-as-a-Service on top of OpenEverest with KServe, vLLM, an AI gateway, and autoscaling."
+
+  - title: "Prefill, Decode, and Despair: Disaggregated LLM Serving Made Boring"
+    url: "/events/opentechsummit-india-2026/"
+    event_name: "OpenTechSummit India 2026"
+    location: "Mumbai, India — Jio World Centre, Main Stage"
+    date: 2026-11-05
+    speaker: "Sergey Pronin"
+    speaker_slug: "spron-in"
+    type: "conference"
+    image: "/images/resources/opentechsummit-india-2026.jpg"
+    description: "Thursday, November 5 · 1:15–1:30 PM IST. How OpenEverest's KServe provider hides disaggregated LLM serving behind a single Instance resource."
+
+  - title: "What Actually Happens When You Send an LLM Request to Kubernetes?"
+    url: "/events/opentechsummit-india-2026/"
+    event_name: "OpenTechSummit India 2026"
+    location: "Mumbai, India — Jio World Centre, Main Stage"
+    date: 2026-11-05
+    speaker: "Atharva Mhaske"
+    speaker_slug: "atharvamhaske"
+    type: "conference"
+    image: "/images/resources/opentechsummit-india-2026.jpg"
+    description: "Thursday, November 5 · 4:05–4:10 PM IST. Following an LLM request hop by hop through Kubernetes, using OpenEverest and KubeAI as a concrete case."
+
+  - title: "Meet OpenEverest at OpenTechSummit India 2026"
+    url: "/events/opentechsummit-india-2026/"
+    event_name: "OpenTechSummit India 2026"
+    location: "Mumbai, India — Jio World Centre"
+    date: 2026-11-05
+    type: "conference"
+    image: "/images/resources/opentechsummit-india-2026.jpg"
+    description: "Thursday, November 5. Visit the OpenEverest project table. Full schedule, talks, and who you'll meet."
+
+  - title: "What Does It Actually Take to Build a Managed Database Service on Kubernetes?"
+    url: "https://kcdbudapest.hu/agenda/#session-1322271"
+    event_name: "KCD Budapest 2026"
+    location: "Budapest, Hungary — Óbuda University, Room 2"
+    date: 2026-10-30
+    speaker: "Kate Obiidykhata"
+    type: "conference"
+    image: "/images/resources/kcd-budapest-2026.jpg"
+    description: "Friday, October 30 · 1:35–2:10 PM. The real architecture behind an open source RDS built on Kubernetes — what worked, what failed, and what we'd do differently."
+
   - title: "Comparing Vector Databases on Kubernetes"
     url: "https://buildevcon.com/events/vector-in-databases"
     event_name: "BuildDevCon, DB Mastery Series, Vector Databases"
